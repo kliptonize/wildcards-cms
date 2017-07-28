@@ -102,11 +102,32 @@
       ),
       'required' => true,
     ),
+    5 => 
+    array (
+      'name' => 'topic',
+      'label' => '',
+      'type' => 'collectionlink',
+      'default' => '',
+      'info' => '',
+      'group' => 'Meta',
+      'localize' => false,
+      'options' => 
+      array (
+        'link' => 'Topics',
+        'multiple' => false,
+      ),
+      'width' => '1-1',
+      'lst' => true,
+      'acl' => 
+      array (
+      ),
+      'required' => true,
+    ),
   ),
   'sortable' => true,
   'in_menu' => false,
   '_created' => 1501150289,
-  '_modified' => 1501150289,
+  '_modified' => 1501190117,
   'color' => '#A0D468',
   'acl' => 
   array (

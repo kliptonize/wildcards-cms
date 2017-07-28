@@ -1,7 +1,7 @@
 <?php
  return array (
   'name' => 'Cards',
-  'label' => 'Cards',
+  'label' => 'Card',
   '_id' => 'Cards5974b5a160809',
   'fields' => 
   array (
@@ -27,7 +27,7 @@
     1 => 
     array (
       'name' => 'image',
-      'label' => 'Image for card',
+      'label' => 'Image of card',
       'type' => 'image',
       'default' => '',
       'info' => '',
@@ -46,7 +46,7 @@
     2 => 
     array (
       'name' => 'linked_to_set',
-      'label' => 'Linked to set',
+      'label' => 'Set of this card',
       'type' => 'collectionlink',
       'default' => '',
       'info' => '',
@@ -54,7 +54,7 @@
       'localize' => false,
       'options' => 
       array (
-        'link' => 'Sources',
+        'link' => 'Sets',
         'multiple' => false,
       ),
       'width' => '1-1',
@@ -67,12 +67,12 @@
   ),
   'sortable' => true,
   'in_menu' => false,
-  '_created' => 1501150390,
-  '_modified' => 1501150390,
-  'color' => '#D8334A',
+  '_created' => 1500820897,
+  '_modified' => 1501168191,
+  'color' => '#A0D468',
   'acl' => 
   array (
   ),
   'icon' => 'stop.svg',
-  'description' => 'Cards for sets',
+  'description' => 'A card contains information, and are grouped in \'sets\'',
 );
