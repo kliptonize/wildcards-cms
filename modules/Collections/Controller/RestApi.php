@@ -89,7 +89,9 @@ class RestApi extends \LimeExtra\Controller {
             return $this->stop('{"error": "Unauthorized"}', 401);
         }
 
-        $data['_by'] = $this->module('cockpit')->getUser('_id');
+        $data['_by'] = new \MongoDB\BSON\ObjectID($this->module('cockpit')->getUser('_id'));
+
+        //Loop over data
 
         $data = $this->module('collections')->save($collection, $data);
 

@@ -2,7 +2,7 @@
 
 return [
     // cockpit session name
-    'session.name' => 'wilcards',
+    'session.name' => 'wildcards',
 /*
     // salt for password hashing etc.
     'sec-key'      => 'c3b40c4c-db44-s5h7-a814-b4931a15e5e1',
@@ -41,6 +41,6 @@ return [
     $ make
     $ sudo make install
     $ echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`;
- * After that, manually copy-paste mongodb.so from 'bin/mongodb-*' to 'lib/php/extensions/no-debug-*'
+ * After that, manually copy-paste mongodb.so from 'bin/mongodb-xxx/modules' to 'lib/php/extensions/no-debug-*'
  * restart MAMP / server
 */

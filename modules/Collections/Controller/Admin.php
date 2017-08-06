@@ -27,9 +27,15 @@ class Admin extends \Cockpit\AuthController {
     }
 
     public function _find() {
-
         if ($this->param('collection') && $this->param('options')) {
-            return $this->module('collections')->find($this->param('collection'), $this->param('options'));
+            $entries = $this->module('collections')->find($this->param('collection'), $this->param('options'));
+
+            //Update entries to add readable names
+            foreach($entries as &$entry){
+                $entry = $this->_updateEntryWithReadableReferenceNames($entry);
+            }
+
+            return $entries;
         }
 
         return false;
@@ -136,6 +142,9 @@ class Admin extends \Cockpit\AuthController {
 
             $entry = $this->module('collections')->findOne($collection['name'], ['_id' => $id]);
 
+            //Add readable name as "display" if entry contains references
+            $entry = $this->_updateEntryWithReadableReferenceNames($entry);
+
             if (!$entry) {
                 return false;
             }
@@ -179,6 +188,13 @@ class Admin extends \Cockpit\AuthController {
             $revision = !(json_encode($_entry) == json_encode($entry));
         } else {
             $revision = true;
+        }
+
+        //Loop over entry, and update all "_id" with ObjectID. Goddamn, should have length 24, and be string, and be prefixed with "_"
+        //new \MongoDB\BSON\ObjectID();
+        //Of course, only if storageType = MongoDB
+        if ($this->app->storage->type == 'mongodb') {
+            $entry = $this->_updateRecursiveArrayWithMongoObjectIDs($entry);
         }
 
         $entry = $this->module('collections')->save($collection['name'], $entry, ['revision' => $revision]);
@@ -241,6 +257,11 @@ class Admin extends \Cockpit\AuthController {
         $count   = $this->app->module('collections')->count($collection['name'], isset($options['filter']) ? $options['filter'] : []);
         $pages   = isset($options['limit']) ? ceil($count / $options['limit']) : 1;
         $page    = 1;
+
+        //Loop over entries, search for ObjectId's, and find a way to add them safely
+        foreach ($entries as $entry_key => &$entry) {
+            $entry = $this->_updateEntryWithReadableReferenceNames($entry);
+        }
 
         if ($pages > 1 && isset($options['skip'])) {
             $page = ceil($options['skip'] / $options['limit']) + 1;
@@ -368,5 +389,70 @@ class Admin extends \Cockpit\AuthController {
         }
 
         return $_filter;
+    }
+
+    protected function _updateRecursiveArrayWithMongoObjectIDs($entry){
+        //Loop over entry, and update all "_id" with ObjectID. Goddamn, should have length 24, and be string, and be prefixed with "_"
+        foreach($entry as $key => &$value){
+            if(is_array($value) && !array_key_exists('$oid', $value)){
+                $value = $this->_updateRecursiveArrayWithMongoObjectIDs($value);
+            }
+            if(substr($key, 0, 1) === "_"){
+                if(is_string($value) && strlen($value) === 24){
+                    $value = new \MongoDB\BSON\ObjectID($value);
+                }elseif(is_array($value) && array_key_exists('$oid', $value)){
+                    $value = new \MongoDB\BSON\ObjectID($value['$oid']);
+                }
+            }
+        }
+        return $entry;
+    }
+
+    protected function _updateEntryWithReadableReferenceNames($entry){
+        //Update all MongoID-reference fields and add a "display"-field with title of object
+        foreach($entry as $key => &$value){
+            if(is_array($value)){
+                foreach($value as $value_key => &$val){
+                    //Check if this $value has nested array
+                    if(is_int($value_key) && is_array($val)){
+                        if(array_key_exists("_id", $val)){
+                            //Add readable name, you never know
+                            $object = $this->app->module('collections')->findOne($key . "s", ["_id" => $val["_id"]]);
+                            $val["display"] = $this->_determineTitle($object);
+                        }
+                    }elseif($value_key === "_id"){
+                        //Add readable name, you never know
+                        $object = $this->app->module('collections')->findOne($key . "s", ["_id" => $val]);
+                        $value["display"] = $this->_determineTitle($object);
+                    }
+                }
+            }
+        }
+
+        return $entry;
+    }
+
+    protected function _determineTitle($object){
+        $title = null;
+        if($object !== null && is_array($object)){
+            $possibilities = ["title", "name"];
+            foreach($possibilities as $p){
+                if(array_key_exists($p, $object)){
+                    $title = $object[$p];
+                }
+            }
+            if($title === null){
+                foreach($object as $obj_key => $obj_val){
+                    if(is_string($obj_val)){
+                        $title = $obj_val;
+                        break;
+                    }
+                }
+            }
+        }else{
+            $title = "Object not found";
+        }
+
+        return $title;
     }
 }

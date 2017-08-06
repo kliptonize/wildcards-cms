@@ -201,9 +201,7 @@
 
         var _entry = e.item.entry;
         var entry = {
-            _id: _entry._id, 
-            link: this.collection.name, 
-            display: _entry[opts.display] || _entry[this.collection.fields[0].name] || 'n/a'
+            _id: _entry._id,
         };
 
         if (opts.multiple) {

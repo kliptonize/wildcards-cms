@@ -60,7 +60,7 @@ class Mongo {
         $skip   = isset($options["skip"])   && $options["skip"]   ? $options["skip"]   : null;
 
         $filter = $this->_fixMongoIds($filter);
-
+        
         $cursor = $this->getCollection($collection)->find($filter, [
             'projection' => $fields,
             'limit' => $limit,
@@ -69,7 +69,6 @@ class Mongo {
         ]);
 
         $docs = $cursor->toArray();
-
         if (count($docs)) {
 
             foreach ($docs as &$doc) {
@@ -179,6 +178,8 @@ class Mongo {
                             $id = new \MongoDB\BSON\ObjectID($id);
                         }
                     }
+                } elseif (is_array($v) && isset($v["$oid"])){
+                    $v = new \MongoDB\BSON\ObjectID($v["$oid"]);
                 }
             }
 

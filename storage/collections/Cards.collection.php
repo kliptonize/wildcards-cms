@@ -45,7 +45,7 @@
     ),
     2 => 
     array (
-      'name' => 'linked_to_set',
+      'name' => 'set',
       'label' => 'Set of this card',
       'type' => 'collectionlink',
       'default' => '',
@@ -68,7 +68,7 @@
   'sortable' => true,
   'in_menu' => false,
   '_created' => 1500820897,
-  '_modified' => 1501168191,
+  '_modified' => 1501685026,
   'color' => '#A0D468',
   'acl' => 
   array (

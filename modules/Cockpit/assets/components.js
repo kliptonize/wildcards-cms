@@ -229,12 +229,12 @@ riot.tag2('cp-account', '<span class="uk-icon-spinner uk-icon-spin" show="{!acco
         })
 
         this.on('update', function(){
-
-            if (this.account && this.account._id == opts.account) {
+            //It's an ObjectId, not just an id, so get that, not just opts.account
+            if (this.account && this.account._id == opts.account['$oid']) {
                 return;
             }
 
-            Cockpit.account(opts.account).then(function(account) {
+            Cockpit.account(opts.account['$oid']).then(function(account) {
                 $this.account = account;
                 $this.update();
             });
