@@ -1,14 +1,14 @@
 <?php
  return array (
-  'name' => 'Sets',
-  'label' => 'Sets',
-  '_id' => 'Sets5974b6e097ea2',
+  'name' => 'Stories',
+  'label' => 'Stories',
+  '_id' => 'Stories5974b6e097ea2',
   'fields' => 
   array (
     0 => 
     array (
       'name' => 'title',
-      'label' => 'Title of set',
+      'label' => 'Title of story',
       'type' => 'text',
       'default' => '',
       'info' => '',
@@ -27,7 +27,7 @@
     1 => 
     array (
       'name' => 'image',
-      'label' => 'First image of set',
+      'label' => 'First image of story',
       'type' => 'image',
       'default' => '',
       'info' => '',
@@ -86,7 +86,7 @@
     4 => 
     array (
       'name' => 'sourceurl',
-      'label' => 'Source of set',
+      'label' => 'Source of story',
       'type' => 'text',
       'default' => '',
       'info' => '',
@@ -133,5 +133,5 @@
   array (
   ),
   'icon' => 'archive.svg',
-  'description' => 'Sets of cards, contains a set of information',
+  'description' => 'Stories of cards, contains a story',
 );

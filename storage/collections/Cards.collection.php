@@ -45,8 +45,8 @@
     ),
     2 => 
     array (
-      'name' => 'set',
-      'label' => 'Set of this card',
+      'name' => 'story',
+      'label' => 'Story of this card',
       'type' => 'collectionlink',
       'default' => '',
       'info' => '',
@@ -54,7 +54,7 @@
       'localize' => false,
       'options' => 
       array (
-        'link' => 'Sets',
+        'link' => 'Stories',
         'multiple' => false,
       ),
       'width' => '1-1',
@@ -74,5 +74,5 @@
   array (
   ),
   'icon' => 'stop.svg',
-  'description' => 'A card contains information, and are grouped in \'sets\'',
+  'description' => 'A card contains information, and are grouped in \'stories\'',
 );
