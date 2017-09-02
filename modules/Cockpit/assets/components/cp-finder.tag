@@ -132,7 +132,7 @@
                     This is an empty folder
                 </div>
 
-                <div class="{modal ? 'uk-overflow-container':''}">
+                <div class="{modal && 'uk-overflow-container'}">
 
                     <div class="uk-margin-top" if="{data && data.folders.length}">
 
@@ -298,7 +298,10 @@
         this.selected   = {};
 
         this.sortBy     = 'name';
-        this.listmode   = App.session.get('app.finder.listmode', 'list');;
+        this.listmode   = App.session.get('app.finder.listmode', 'list');
+
+        this.modal = opts.modal;
+
 
         App.$(this.refs.editor).on('click', function(e){
 
@@ -308,8 +311,6 @@
         });
 
         this.on('mount', function(){
-
-            this.modal = App.$(this.root).closest('.uk-modal').length ? UIkit.modal(App.$(this.root).closest('.uk-modal')):false;
 
             this.loadPath()
 
@@ -342,13 +343,13 @@
                                 App.ui.notify("File(s) failed to uploaded.", "danger");
                             }
 
+                            if (!response) {
+                                App.ui.notify("Something went wrong.", "danger");
+                            }
+
                             if (response && response.uploaded && response.uploaded.length) {
                                 App.ui.notify("File(s) uploaded.", "success");
                                 $this.loadPath();
-                            }
-
-                            if (!response) {
-                                App.ui.notify("Something went wrong.", "danger");
                             }
 
                         }
@@ -431,9 +432,16 @@
 
                 if (e.shiftKey) {
 
-                    var prev, items = this.data[item.is_file ? 'files' : 'folders'];
+                    var prev, i, closest = idx, items = this.data[item.is_file ? 'files' : 'folders'];
 
-                    for (var i=idx;i>=0;i--) {
+                    for (i=idx;i>=0;i--) {
+                        if (items[i].selected) {
+                            closest = i;
+                            break;
+                        }
+                    }
+
+                    for (i=idx;i>=closest;i--) {
                         if (items[i].selected) break;
 
                         items[i].selected = true;
@@ -618,11 +626,6 @@
                 $this.resetselected();
                 $this.update();
 
-                if ($this.modal) {
-                    setTimeout(function(){
-                        $this.modal.resize();
-                    }, 100);
-                }
             });
 
             return defer;

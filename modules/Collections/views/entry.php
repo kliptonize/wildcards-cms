@@ -181,10 +181,13 @@
 
             // bind clobal command + save
             Mousetrap.bindGlobal(['command+s', 'ctrl+s'], function(e) {
-
-                e.preventDefault();
-                $this.submit();
+                $this.submit(e);
                 return false;
+            });
+
+            // wysiwyg cmd + save hack
+            App.$(this.root).on('submit', function(e, component) {
+                if (component) $this.submit(e);
             });
         });
 
@@ -219,6 +222,8 @@
             }, function(res) {
                 App.ui.notify(res && res.message ? res.message : "Saving failed.", "danger");
             });
+
+            return false;
         }
 
         hasFieldAccess(field) {

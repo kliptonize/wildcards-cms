@@ -11,13 +11,13 @@
 
     <style>
 
+        html, body {
+            background: #0e0f19; 
+        }
+
         .login-container {
             width: 360px;
             max-width: 90%;
-        }
-
-        html {
-            background: #222228;
         }
 
         .uk-panel-box-header {
@@ -76,9 +76,12 @@
                 </div>
 
                 <div class="uk-margin-large-top">
-                    <button class="uk-button uk-button-large uk-button-primary uk-width-1-1">@lang('Authenticate')</button>
+                    <button class="uk-button uk-button-outline uk-button-large uk-button-primary uk-width-1-1">@lang('Authenticate')</button>
                 </div>
             </div>
+
+            <p class="uk-text-center" if="{!$user}"><a href="@route('/auth/forgotpassword')">@lang('Forgot Password?')</a></p>
+
 
         </form>
 

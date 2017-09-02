@@ -1,11 +1,17 @@
 <field-layout>
 
-    <div class="uk-text-center {opts.child ? 'uk-text-small':'uk-placeholder'}" show="{ !items.length }">
-        { App.i18n.get('No Components') }
+    <style>
+        .layout-components > div {
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <div class="uk-text-center uk-text-muted {opts.child ? 'uk-text-small':'uk-placeholder'}" show="{ !items.length }">
+        <img class="uk-svg-adjust" riot-src="{ App.base('/assets/app/media/icons/layout.svg') }" width="100" data-uk-svg>
     </div>
 
-    <div class="uk-sortable" ref="components" show="{mode=='edit' && items.length}" data-uk-sortable>
-        <div class="uk-margin uk-panel-box uk-panel-card" each="{ item,idx in items }" data-idx="{idx}">
+    <div class="uk-sortable layout-components" ref="components" show="{mode=='edit' && items.length}" data-uk-sortable>
+        <div class="uk-panel-box uk-panel-card" each="{ item,idx in items }" data-idx="{idx}">
             
             <div class="uk-flex uk-flex-middle uk-text-small uk-visible-hover">
                 <img class="uk-margin-small-right" riot-src="{ parent.components[item.component].icon ? parent.components[item.component].icon : App.base('/assets/app/media/icons/component.svg')}" width="16">
@@ -31,7 +37,7 @@
     </div>
 
     <div class="uk-margin uk-text-center">
-        <a class="uk-button { !opts.child ? 'uk-button-primary uk-button-large':'uk-button-small'}" onclick="{ addComponent }" title="{ App.i18n.get('Add component') }" data-uk-tooltip="pos:'bottom'"><i class="uk-icon-plus-circle"></i></a>
+        <a class="uk-button uk-button-outline uk-text-primary { !opts.child ? 'uk-button-large':'uk-button-small'}" onclick="{ addComponent }" title="{ App.i18n.get('Add component') }" data-uk-tooltip="pos:'bottom'"><i class="uk-icon-plus-circle"></i></a>
     </div>
 
     <div class="uk-modal uk-sortable-nodrag" ref="modalComponents">
@@ -58,19 +64,36 @@
     </div>
 
     <div class="uk-modal uk-sortable-nodrag" ref="modalSettings">
-        <div class="uk-modal-dialog" if="{settingsComponent}">
+        <div class="uk-modal-dialog { components[settingsComponent.component].dialog=='large' && 'uk-modal-dialog-large' }" if="{settingsComponent}">
             
+            <a class="uk-modal-close uk-close"></a>
+
             <h3 class="uk-margin-large-bottom">
                 <img class="uk-margin-small-right" riot-src="{ components[settingsComponent.component].icon ? components[settingsComponent.component].icon : App.base('/assets/app/media/icons/settings.svg')}" width="30">
                 { components[settingsComponent.component].label || App.Utils.ucfirst(settingsComponent.component) }
             </h3>
 
-            <div class="uk-margin" if="{components[settingsComponent.component].fields}">
-                <field-set class="uk-margin" bind="settingsComponent.settings" fields="{components[settingsComponent.component].fields}"></field-set>
-            </div>
+            <ul class="uk-tab uk-margin-bottom uk-flex uk-flex-center">
+                <li class="{ !settingsGroup && 'uk-active'}"><a class="uk-text-capitalize" onclick="{ toggleGroup }">{ App.i18n.get('All') }</a></li>
+                <li class="{ group==parent.settingsGroup && 'uk-active'}" each="{items,group in settingsGroups}" show="{ items.length }"><a class="uk-text-capitalize" onclick="{ toggleGroup }">{ App.i18n.get(group) }</a></li>
+            </ul>
 
-            <div class="uk-margin">
-                <field-set class="uk-margin" bind="settingsComponent.settings" fields="{generalSettingsFields}"></field-set>
+            <div class="uk-grid uk-grid-small uk-grid-match">
+                
+                <div class="uk-grid-margin uk-width-medium-{field.width}" each="{field,idx in settingsFields}" show="{!settingsGroup || (settingsGroup == field.group) }" no-reorder>
+
+                    <div class="uk-panel">
+
+                        <label class="uk-text-bold">{ field.label || field.name }</label>
+
+                            <div class="uk-margin uk-text-small uk-text-muted">{ field.info || ' ' }</div>
+
+                            <div class="uk-margin">
+                                <cp-field type="{field.type || 'text'}" bind="settingsComponent.settings[{field.name}]" opts="{ field.options || {} }"></cp-field>
+                            </div>
+                    </div>
+
+                </div>
             </div>
 
             <div class="uk-text-right uk-margin-top">
@@ -90,9 +113,9 @@
         this.items = [];
         this.settingsComponent = null;
         this.generalSettingsFields  = [
-            {name: "id", type: "text" },
-            {name: "class", type: "text" },
-            {name: "style", type: "code", options: {syntax: "css"} }
+            {name: "id", type: "text", group: "General" },
+            {name: "class", type: "text", group: "General" },
+            {name: "style", type: "code", group: "General", options: {syntax: "css", height: "100px"}}
         ];
 
         this.on('mount', function() {
@@ -138,9 +161,7 @@
         }.bind(this);
 
         addComponent(e) {
-
-            this.refs.modalComponents.afterComponent = e.item.idx || e.item.idx === 0 ? e.item.idx : false;
-
+            this.refs.modalComponents.afterComponent = e.item && e.item.item ? e.item.idx : false;
             UIkit.modal(this.refs.modalComponents, {modal:false}).show();
         }
 
@@ -155,7 +176,7 @@
                 item.children = [];
             }
 
-            if (this.refs.modalComponents.afterComponent !== false) {
+            if (App.Utils.isNumber(this.refs.modalComponents.afterComponent)) {
                 this.items.splice(this.refs.modalComponents.afterComponent + 1, 0, item);
                 this.refs.modalComponents.afterComponent = false;
             } else {
@@ -175,11 +196,45 @@
 
         settings(e) {
             
+            var component = e.item.item;
+
             this.settingsComponent = e.item.item;
+
+            this.settingsFields    = (this.components[component.component].fields || []).concat(this.generalSettingsFields);
+            this.settingsFieldsIdx = {};
+            this.settingsGroups    = {main:[]};
+            this.settingsGroup     = 'main';
+
+            // fill with default values
+            this.settingsFields.forEach(function(field){
+
+                $this.settingsFieldsIdx[field.name] = field;
+
+                if (component.settings[field.name] === undefined) {
+                    component.settings[field.name] = field.options && field.options.default || null;
+                }
+
+                if (field.group && !$this.settingsGroups[field.group]) {
+                    $this.settingsGroups[field.group] = [];
+                } else if (!field.group) {
+                    field.group = 'main';
+                }
+
+                $this.settingsGroups[field.group || 'main'].push(field);
+            });
+
+            if (!this.settingsGroups[this.settingsGroup].length) {
+                this.settingsGroup = Object.keys(this.settingsGroups)[1];
+            }
 
             setTimeout(function() {
                 UIkit.modal(this.refs.modalSettings, {modal:false}).show();
             }.bind(this));
+        }
+
+        toggleGroup(e) {
+            e.preventDefault();
+            this.settingsGroup = e.item && e.item.group || false;
         }
 
         this.components = {
@@ -193,15 +248,17 @@
 
             "text": {
                 "icon": App.base('/assets/app/media/icons/text.svg'),
+                "dialog": "large",
                 "fields": [
-                    {"name": "text", "type": "wysiwyg"},
+                    {"name": "text", "type": "wysiwyg"}
                 ]
             },
 
             "html": {
                 "icon": App.base('/assets/app/media/icons/code.svg'),
+                "dialog": "large",
                 "fields": [
-                    {"name": "html", "type": "html"},
+                    {"name": "html", "type": "html"}
                 ]
             },
 
@@ -209,6 +266,7 @@
                 "icon": App.base('/assets/app/media/icons/heading.svg'),
                 "fields": [
                     {"name": "text", "type": "text"},
+                    {"name": "tag", "type": "select", "options":{"options":['h1','h2','h3','h4','h5','h6']}}
                 ]
             },
 
@@ -227,10 +285,20 @@
                 "icon": App.base('/assets/app/media/icons/button.svg'),
                 "fields": [
                     {"name": "text", "type": "text"},
-                    {"name": "url", "type": "text"},
+                    {"name": "url", "type": "text"}
                 ]
             }
         };
+
+        if (window.CP_LAYOUT_COMPONENTS && App.Utils.isObject(window.CP_LAYOUT_COMPONENTS)) {
+            this.components = App.$.extend(true, this.components, window.CP_LAYOUT_COMPONENTS);
+        }
+
+        if (opts.components && App.Utils.isObject(opts.components)) {
+            this.components = App.$.extend(true, this.components, opts.components);
+        }
+
+        App.trigger('field.layout.components', {components:this.components});
         
     </script>
 
@@ -283,7 +351,7 @@
         this.fields  = [
             {name: "id", type: "text" },
             {name: "class", type: "text" },
-            {name: "style", type: "code", options: {syntax: "css"}  }
+            {name: "style", type: "code", options: {syntax: "css", height: "100px"}  }
         ];
         this.settingsComponent = null;
 

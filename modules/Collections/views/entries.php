@@ -31,17 +31,17 @@
 
 </div>
 
-<div class="uk-margin uk-text-center uk-text-muted">
-
-    <img class="uk-svg-adjust" src="@url($collection['icon'] ? 'assets:app/media/icons/'.$collection['icon']:'collections:icon.svg')" width="50" alt="icon" data-uk-svg>
-    @if($collection['description'])
-    <div class="uk-container-center uk-margin-top uk-width-medium-1-2">
-        {{ $collection['description'] }}
-    </div>
-    @endif
-</div>
-
 <div class="uk-margin-top" riot-view>
+
+    <div class="uk-margin uk-text-center uk-text-muted" show="{ (Array.isArray(entries) && entries.length) || filter}">
+
+        <img class="uk-svg-adjust" src="@url($collection['icon'] ? 'assets:app/media/icons/'.$collection['icon']:'collections:icon.svg')" width="50" alt="icon" data-uk-svg>
+        @if($collection['description'])
+        <div class="uk-container-center uk-margin-top uk-width-medium-1-2">
+            {{ $collection['description'] }}
+        </div>
+        @endif
+    </div>
 
 
     <div show="{ ready }">
@@ -60,11 +60,16 @@
 
         <div class="uk-width-medium-1-3 uk-viewport-height-1-2 uk-container-center uk-text-center uk-flex uk-flex-center uk-flex-middle" if="{ !loading && !entries.length && !filter }">
 
-            <div class="uk-animation-scale">
-                
-                <div class="uk-margin"><img src="@base('assets:app/media/icons/items.svg')" width="80" data-uk-svg></div>
+            <div class="uk-animation-scale uk-text-muted">
+
+                <img class="uk-svg-adjust" src="@url($collection['icon'] ? 'assets:app/media/icons/'.$collection['icon']:'collections:icon.svg')" width="50" alt="icon" data-uk-svg>
+                @if($collection['description'])
+                <div class="uk-margin-top uk-text-small">
+                    {{ $collection['description'] }}
+                </div>
+                @endif
                 <hr>
-                <span class="uk-text-large uk-text-muted">@lang('No entries'). <a href="@route('/collections/entry/'.$collection['name'])">@lang('Create an entry').</a></span>
+                <span class="uk-text-large">@lang('No entries'). <a href="@route('/collections/entry/'.$collection['name'])">@lang('Create an entry').</a></span>
 
             </div>
 
@@ -145,7 +150,11 @@
             return field.lst;
         });
 
-        this.fields.push({name:'_modified', 'label':'@lang('Modified')'});
+        this.fieldsidx['_created'] = {name:'_created', 'label':'@lang('Created')', type: 'text'};
+        this.fieldsidx['_modified'] = {name:'_modified', 'label':'@lang('Modified')', type: 'text'};
+
+        this.fields.push(this.fieldsidx['_created']);
+        this.fields.push(this.fieldsidx['_modified']);
 
         this.sort     = {'_created': -1};
         this.selected = [];
@@ -331,10 +340,10 @@
             }
 
             if (!this.sort[col]) {
-                this.sort        = {};
+                this.sort      = {};
                 this.sort[col] = 1;
             } else {
-                this.sort[col] = this.sort[col] == 1 ? -1:1;
+                this.sort[col] = this.sort[col] == 1 ? -1 : 1;
             }
 
             this.sortedBy = field;
@@ -359,7 +368,7 @@
                 });
             }
 
-            $root.find('[data-check="all"]').prop('checked', checkboxes.length === selected.length);
+            $root.find('[data-check="all"]').prop('checked', checkboxes.length && checkboxes.length === selected.length);
 
             if (update) {
                 this.update();
@@ -400,16 +409,16 @@
         }
 
         hasFieldAccess(field) {
-  
+
             var acl = this.fieldsidx[field] && this.fieldsidx[field].acl || [];
 
-            if (field == '_modified' || 
-                App.$data.user.group == 'admin' || 
+            if (field == '_modified' ||
+                App.$data.user.group == 'admin' ||
                 !acl ||
                 (Array.isArray(acl) && !acl.length) ||
                 acl.indexOf(App.$data.user.group) > -1 ||
                 acl.indexOf(App.$data.user._id) > -1
-            
+
             ) { return true; }
 
             return false;
