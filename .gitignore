@@ -16,4 +16,3 @@ addons/
 !/storage/*/.htaccess
 !/storage/collections
 defines.php
-/assets/public/*
