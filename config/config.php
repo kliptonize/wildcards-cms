@@ -1,5 +1,9 @@
 <?php
-
+if(getenv("HOSTNAME")){
+    $mongo_server = "mongodb://mongo:27017";
+}else{
+    $mongo_server = "mongodb://localhost:27017";
+}
 return [
     // cockpit session name
     'session.name' => 'wildcards',
@@ -12,7 +16,7 @@ return [
 
     // use mongodb as main data storage
     "database"    => [
-        "server"  => "mongodb://localhost:27017",
+        "server"  => $mongo_server,
         "options" => ["db" => "wildcards"]
     ],
 /*
